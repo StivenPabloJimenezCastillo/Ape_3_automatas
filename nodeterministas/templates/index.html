@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Simulador NFA</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
+            margin: 30px;
+        }
+
+        .contenedor {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        input, select, button {
+            padding: 8px;
+            margin: 5px;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            border: 1px solid #333;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background: #ddd;
+        }
+
+        .aceptado {
+            color: green;
+            font-weight: bold;
+        }
+
+        .rechazado {
+            color: red;
+            font-weight: bold;
+        }
+
+        .diagrama {
+            background: #eef;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            margin-top: 10px;
+        }
+
+        .nota {
+            background: #fff3cd;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .resumen {
+            background: #e8f4ff;
+            padding: 12px;
+            position: sticky;
+            top: 18px;
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+
+        .acordeon {
+            margin-top: 16px;
+            border: 1px solid #c8c8c8;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+
+        .acordeon summary {
+            cursor: pointer;
+            font-weight: bold;
+            padding: 10px 12px;
+        }
+
+        .acordeon-contenido {
+            padding: 0 12px 12px;
+        }
+
+        .sin-transicion {
+            color: #b00020;
+            font-weight: bold;
+        }
+
+        .acordeones-diagramas {
+            margin-top: 16px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .acordeon-diagrama {
+            border: 1px solid #c8d8ea;
+            border-radius: 12px;
+            background: #f8fbff;
+            overflow: hidden;
+        }
+
+        .acordeon-diagrama summary {
+            cursor: pointer;
+            font-weight: bold;
+            padding: 12px 14px;
+            background: #eef5ff;
+        }
+
+        .acordeon-diagrama summary span {
+            color: #1f4f8f;
+        }
+
+        .acordeon-diagrama-contenido {
+            padding: 10px 12px 14px;
+        }
+
+        .contenedor-svg {
+            overflow-x: auto;
+            background: #fff;
+            border-radius: 10px;
+            border: 1px solid #dce8f5;
+            padding: 8px;
+        }
+
+        .diagrama-svg {
+            width: 100%;
+            height: auto;
+            display: block;
+            min-height: 560px;
+        }
+
+        .titulo-svg {
+            font-size: 16px;
+            font-weight: bold;
+            fill: #22313f;
+        }
+
+        .inicio-svg {
+            font-size: 13px;
+            fill: #52616b;
+        }
+
+        .flecha-svg {
+            stroke: #34495e;
+            stroke-width: 2.2;
+            fill: none;
+        }
+
+        .curva-svg {
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .etiqueta-svg {
+            font-size: 12px;
+            fill: #c0392b;
+            font-weight: bold;
+        }
+
+        .estado-svg {
+            fill: #ffffff;
+            stroke: #2c3e50;
+            stroke-width: 2;
+        }
+
+        .estado-inicial {
+            fill: #e8f4ff;
+        }
+
+        .estado-final-exterior {
+            fill: none;
+            stroke: #2c3e50;
+            stroke-width: 2;
+        }
+
+        .estado-texto {
+            font-size: 16px;
+            font-weight: bold;
+            fill: #1f2d3d;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="contenedor">
+    <h1>Simulador de Automatas No Deterministas</h1>
+
+    <form method="POST">
+        <label>Automata:</label>
+        <select name="automata">
+            {% for clave, item in automatas.items() %}
+                <option value="{{ clave }}" {% if clave == seleccionado %}selected{% endif %}>
+                    {{ item.nombre }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <br>
+
+        <label>Entrada:</label>
+        <input type="text" name="entrada" value="{{ entrada_texto }}" placeholder="Ej: HDR TEMP CRC">
+
+        <button type="submit">Ejecutar</button>
+    </form>
+
+    <div class="nota">
+        <b>Formato de entrada:</b>
+        {% if seleccionado == "proteina" %}
+            puedes escribir <b>KGXXXXF</b> o <b>K G X X X X F</b>.
+        {% else %}
+            escribe los simbolos separados por espacios.
+            Ejemplo: <b>HOME SEARCH CART</b>
+        {% endif %}
+    </div>
+
+    <h2>{{ automata.nombre }}</h2>
+
+    <h3>Diagramas por automata</h3>
+    <div class="acordeones-diagramas">
+        {% for clave, item in automatas.items() %}
+            <details class="acordeon-diagrama" {% if clave == seleccionado %}open{% endif %}>
+                <summary>
+                    {{ item.nombre }}
+                    {% if clave == seleccionado %}<span>(seleccionado)</span>{% endif %}
+                </summary>
+                <div class="acordeon-diagrama-contenido">
+                    <div class="contenedor-svg">
+                        {{ diagramas[clave] | safe }}
+                    </div>
+                </div>
+            </details>
+        {% endfor %}
+    </div>
+
+    <details class="acordeon">
+        <summary>Ver informacion del automata (detalles tecnicos)</summary>
+        <div class="acordeon-contenido">
+            <h3>Alfabeto</h3>
+            <p>{{ automata.alfabeto }}</p>
+
+            <h3>Estados</h3>
+            <p>{{ automata.estados }}</p>
+
+            <h3>Estado inicial</h3>
+            <p>{{ automata.inicial }}</p>
+
+            <h3>Estados de aceptacion</h3>
+            <p>{{ automata.finales }}</p>
+
+            <h3>Tabla de transiciones</h3>
+            <table>
+                <tr>
+                    <th>Estado</th>
+                    {% for simbolo in automata.alfabeto %}
+                        <th>{{ simbolo }}</th>
+                    {% endfor %}
+                </tr>
+
+                {% for estado in automata.estados %}
+                    <tr>
+                        <td>{{ estado }}</td>
+
+                        {% for simbolo in automata.alfabeto %}
+                            <td>
+                                {% set clave = (estado, simbolo) %}
+                                {% if clave in automata.transiciones %}
+                                    {{ automata.transiciones[clave] }}
+                                {% else %}
+                                    ∅
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </table>
+
+            <h3>Diagrama de transicion</h3>
+            <div class="diagrama">
+                {% for clave, destinos in automata.transiciones.items() %}
+                    {{ clave[0] }} -- {{ clave[1] }} --> {{ destinos }} <br>
+                {% endfor %}
+            </div>
+        </div>
+    </details>
+
+    {% if resultado is not none %}
+        <h3>Resultado</h3>
+
+        {% if resultado %}
+            <p class="aceptado">Cadena aceptada</p>
+        {% else %}
+            <p class="rechazado">Cadena rechazada</p>
+        {% endif %}
+
+        <div class="resumen">
+            <b>Resumen de ejecucion:</b>
+            simbolos procesados: {{ pasos | length }} |
+            estado inicial: {{ automata.inicial }} |
+            estados alcanzados al final: {{ estados_finales }}
+        </div>
+
+        <h3>Ejecucion paso a paso</h3>
+
+        <table>
+            <tr>
+                <th>Simbolo leido</th>
+                <th>Estados antes</th>
+                <th>Estados despues</th>
+                <th>Observacion</th>
+            </tr>
+
+            {% for paso in pasos %}
+                <tr>
+                    <td>{{ paso.simbolo }}</td>
+                    <td>{{ paso.antes }}</td>
+                    <td>{{ paso.despues }}</td>
+                    <td>
+                        {% if paso.despues | length == 0 %}
+                            <span class="sin-transicion">Sin transicion valida</span>
+                        {% else %}
+                            Transicion aplicada
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+
+        <h3>Estados finales alcanzados</h3>
+        <p>{{ estados_finales }}</p>
+    {% endif %}
+</div>
+
+</body>
+</html>
