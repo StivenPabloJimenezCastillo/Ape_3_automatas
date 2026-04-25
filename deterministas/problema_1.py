@@ -1,3 +1,6 @@
+"""Un sistema de pagos debe asegurar que una transacción pase por los estados correctos (Autorización
+-> Captura -> Liquidación) antes de ser considerada "Completada". No se puede liquidar sin capturar.
+"""
 def transicion(cadena):
     estado = 'q0'
     """autorizado = a, captura= c, liquidacion = l, cancelar = f"""
@@ -6,19 +9,19 @@ def transicion(cadena):
             if simbolo ==  'a':
                 estado = 'q1'
             elif simbolo == 'f':
-                return 'Transacción cancelada (Estado de error)'
+                return 'q_er'
         elif estado == 'q1':
             if simbolo == 'c':
                 estado = 'q2'
             elif simbolo == 'f':
-                estado = 'q_er'
+                return 'q_er'
             else:
                 return 'Cadena no válida'
         elif estado == 'q2':
             if simbolo == 'l':
                 estado = 'q3'
             elif simbolo == 'f':
-                estado = 'q_er'
+                return 'q_er'
             else:
                 return 'Cadena no válida'
         
