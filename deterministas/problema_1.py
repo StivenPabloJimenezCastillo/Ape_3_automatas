@@ -10,6 +10,8 @@ def transicion(cadena):
                 estado = 'q1'
             elif simbolo == 'f':
                 return 'q_er'
+            else:
+                return 'Cadena no válida'
         elif estado == 'q1':
             if simbolo == 'c':
                 estado = 'q2'

@@ -34,9 +34,9 @@ def cerradura(cadena):
         return 'Error: Cerradura bloqueada'
     
 # Pruebas
-"""print(cerradura('cc'))  # Exito: Cerradura abierta
-print(cerradura('iic'))  # Exito: Cerradura abierta
-print(cerradura('iii'))  # Error: Cerradura bloqueada
-print(cerradura('ic'))  # Exito: Cerradura abierta
-print(cerradura('i'))  # Cadena incompleta"""
+print(f"cc {cerradura('cc')}")  # Exito: Cerradura abierta
+print(f"iic {cerradura('iic')}")  # Exito: Cerradura abierta
+print(f"iii {cerradura('iii')}")  # Error: Cerradura bloqueada
+print(f"ic {cerradura('ic')}")  # Exito: Cerradura abierta
+print(f"i {cerradura('i')}")  # Cadena incompleta"""
     
