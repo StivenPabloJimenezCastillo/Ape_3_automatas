@@ -21,6 +21,7 @@ automatas = {
         },
         "placeholder": "Ej: acl",
         "nota": "Usa simbolos de un caracter: a (autoriza), c (captura), l (liquida), f (cancela).",
+        "imagen": "img/problema_1_diagrama.png",
     },
     "cerradura": {
         "nombre": "Cerradura inteligente: maximo 3 intentos",
@@ -43,12 +44,13 @@ automatas = {
         },
         "placeholder": "Ej: iic",
         "nota": "Usa simbolos de un caracter: c (correcto) e i (incorrecto).",
+        "imagen": "img/problema_2_diagrama.png",
     },
     "cientifica": {
         "nombre": "Compilador: numero en notacion cientifica",
         "descripcion": "Valida cadenas como +3.14e-10 o .5e2.",
         "alfabeto": ["+", "-", ".", "e", "E", "0-9"],
-        "estados": ["q0", "q1", "q2", "q3", "q4", "q5", "q6", "q_er"],
+        "estados": ["q0", "q1", "q2", "q3", "q4", "q5", "q6", "q8", "q_er"],
         "inicial": "q0",
         "finales": ["q5"],
         "transiciones": {
@@ -56,18 +58,29 @@ automatas = {
             ("q0", "digito"): "q2",
             ("q0", "."): "q3",
             ("q0", "exp"): "q_er",
+
             ("q1", "digito"): "q2",
+
             ("q2", "."): "q3",
             ("q2", "exp"): "q4",
-            ("q3", "digito"): "q3",
-            ("q3", "exp"): "q4",
+            ("q3", "digito"): "q8",
+            ("q3", "exp"): "q_er",
+
+            ("q8", "digito"): "q8",
+            ("q8", "exp"): "q4",
+
             ("q4", "digito"): "q5",
             ("q4", "signo"): "q6",
+            ("q4", "."): "q_er",
+
             ("q5", "digito"): "q5",
+
             ("q6", "digito"): "q5",
+            ("q6", "signo"): "q_er",
         },
         "placeholder": "Ej: +3.14e-10",
         "nota": "Se procesa caracter por caracter. Debe terminar en exponente numerico valido.",
+        "imagen": "img/problema_3_diagrama.png",
     },
 }
 

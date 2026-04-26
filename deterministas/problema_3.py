@@ -35,7 +35,14 @@ def validar_numero(cadena):
                 return 'Cadena no válida'
         elif estado == 'q3':
             if simbolo in digitos:
-                estado = 'q3'
+                estado = 'q8'
+            elif simbolo in exponente:
+                estado = 'q_er'
+            else:
+                return 'Cadena no válida'
+        elif estado == 'q8':
+            if simbolo in digitos:
+                estado = 'q8'
             elif simbolo in exponente:
                 estado = 'q4'
             else:

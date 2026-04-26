@@ -4,88 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simulador DFA</title>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f2f2f2;
-            margin: 30px;
-        }
-
-        .contenedor {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            max-width: 1000px;
-            margin: auto;
-        }
-
-        input, select, button {
-            padding: 8px;
-            margin: 5px;
-        }
-
-        button {
-            cursor: pointer;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        th, td {
-            border: 1px solid #333;
-            padding: 8px;
-            text-align: center;
-        }
-
-        th {
-            background: #ddd;
-        }
-
-        .aceptado {
-            color: green;
-            font-weight: bold;
-        }
-
-        .rechazado {
-            color: red;
-            font-weight: bold;
-        }
-
-        .nota {
-            background: #fff3cd;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 10px;
-        }
-
-        .resumen {
-            background: #e8f4ff;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 12px;
-        }
-
-        .acordeon {
-            margin-top: 16px;
-            border: 1px solid #c8c8c8;
-            border-radius: 8px;
-            background: #fafafa;
-        }
-
-        .acordeon summary {
-            cursor: pointer;
-            font-weight: bold;
-            padding: 10px 12px;
-        }
-
-        .acordeon-contenido {
-            padding: 0 12px 12px;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
 
@@ -183,6 +102,14 @@
             </table>
         </div>
     </details>
+
+    <div class="diagrama-contenedor">
+        <img
+            src="{{ url_for('static', filename=automata.imagen) }}"
+            alt="Diagrama de transiciones de {{ automata.nombre }}"
+            class="diagrama-imagen"
+        >
+    </div>
 
     {% if resultado is not none %}
         <h3>Resultado</h3>
