@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador DFA</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
+            margin: 30px;
+        }
+
+        .contenedor {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        input, select, button {
+            padding: 8px;
+            margin: 5px;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            border: 1px solid #333;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background: #ddd;
+        }
+
+        .aceptado {
+            color: green;
+            font-weight: bold;
+        }
+
+        .rechazado {
+            color: red;
+            font-weight: bold;
+        }
+
+        .nota {
+            background: #fff3cd;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .resumen {
+            background: #e8f4ff;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+
+        .acordeon {
+            margin-top: 16px;
+            border: 1px solid #c8c8c8;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+
+        .acordeon summary {
+            cursor: pointer;
+            font-weight: bold;
+            padding: 10px 12px;
+        }
+
+        .acordeon-contenido {
+            padding: 0 12px 12px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="contenedor">
+    <h1>Simulador de Automatas Deterministas (DFA)</h1>
+
+    <form method="POST">
+        <label>Automata:</label>
+        <select name="automata" id="automata-select">
+            {% for clave, item in automatas.items() %}
+                <option
+                    value="{{ clave }}"
+                    data-placeholder="{{ item.placeholder }}"
+                    data-descripcion="{{ item.descripcion }}"
+                    data-nota="{{ item.nota }}"
+                    {% if clave == seleccionado %}selected{% endif %}
+                >
+                    {{ item.nombre }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <br>
+
+        <label>Entrada:</label>
+        <input
+            type="text"
+            id="entrada-input"
+            name="entrada"
+            value="{{ entrada_texto }}"
+            placeholder="{{ automata.placeholder }}"
+        >
+
+        <button type="submit">Ejecutar</button>
+    </form>
+
+    <div class="nota">
+        <b>Descripcion:</b> <span id="descripcion-texto">{{ automata.descripcion }}</span><br>
+        <b>Formato de entrada:</b> <span id="nota-texto">{{ automata.nota }}</span>
+    </div>
+
+    <details class="acordeon" open>
+        <summary>Ver informacion del automata (detalles tecnicos)</summary>
+        <div class="acordeon-contenido">
+            <h3>Alfabeto</h3>
+            <p>{{ automata.alfabeto }}</p>
+
+            <h3>Estados</h3>
+            <p>{{ automata.estados }}</p>
+
+            <h3>Estado inicial</h3>
+            <p>{{ automata.inicial }}</p>
+
+            <h3>Estados de aceptacion</h3>
+            <p>{{ automata.finales }}</p>
+
+            <h3>Tabla de transiciones</h3>
+            <table>
+                <tr>
+                    <th>Estado</th>
+                    {% for simbolo in automata.alfabeto %}
+                        <th>{{ simbolo }}</th>
+                    {% endfor %}
+                </tr>
+
+                {% for estado in automata.estados %}
+                    <tr>
+                        <td>{{ estado }}</td>
+
+                        {% for simbolo in automata.alfabeto %}
+                            <td>
+                                {% if seleccionado == "cientifica" %}
+                                    {% if simbolo == "0-9" %}
+                                        {% set clave = (estado, "digito") %}
+                                    {% elif simbolo in ["+", "-"] %}
+                                        {% set clave = (estado, "signo") %}
+                                    {% elif simbolo in ["e", "E"] %}
+                                        {% set clave = (estado, "exp") %}
+                                    {% else %}
+                                        {% set clave = (estado, simbolo) %}
+                                    {% endif %}
+                                {% else %}
+                                    {% set clave = (estado, simbolo) %}
+                                {% endif %}
+
+                                {% if clave in automata.transiciones %}
+                                    {{ automata.transiciones[clave] }}
+                                {% else %}
+                                    ∅
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </details>
+
+    {% if resultado is not none %}
+        <h3>Resultado</h3>
+
+        {% if resultado.aceptado %}
+            <p class="aceptado">{{ resultado.mensaje }}</p>
+        {% else %}
+            <p class="rechazado">{{ resultado.mensaje }}</p>
+        {% endif %}
+
+        <div class="resumen">
+            <b>Estado final:</b> {{ resultado.estado_final }}<br>
+            <b>Simbolos procesados:</b> {{ resultado.pasos | length }}
+        </div>
+
+        <h3>Ejecucion paso a paso</h3>
+        <table>
+            <tr>
+                <th>Simbolo leido</th>
+                <th>Estado antes</th>
+                <th>Estado despues</th>
+                <th>Observacion</th>
+            </tr>
+
+            {% for paso in resultado.pasos %}
+                <tr>
+                    <td>{{ paso.simbolo }}</td>
+                    <td>{{ paso.antes }}</td>
+                    <td>{{ paso.despues }}</td>
+                    <td>{{ paso.observacion }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+</div>
+
+<script>
+    (function () {
+        var select = document.getElementById("automata-select");
+        var entrada = document.getElementById("entrada-input");
+        var descripcion = document.getElementById("descripcion-texto");
+        var nota = document.getElementById("nota-texto");
+
+        function actualizarAyuda() {
+            var opcion = select.options[select.selectedIndex];
+            if (!opcion) {
+                return;
+            }
+
+            entrada.placeholder = opcion.dataset.placeholder || "";
+            descripcion.textContent = opcion.dataset.descripcion || "";
+            nota.textContent = opcion.dataset.nota || "";
+        }
+
+        select.addEventListener("change", actualizarAyuda);
+        actualizarAyuda();
+    })();
+</script>
+
+</body>
+</html>

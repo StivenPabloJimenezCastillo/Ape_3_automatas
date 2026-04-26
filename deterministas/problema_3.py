@@ -69,7 +69,7 @@ def validar_numero(cadena):
     else:        
         return 'Cadena incompleta o no válida'
     
-# pruebas
+"""# pruebas
 print(f"+3.14e-10: {validar_numero('+3.14e-10')}")  # Número válido en notación científica
 print(f".5e2: {validar_numero('.5e2')}")  # Número válido en notación científica
 print(f"3.14e: {validar_numero('3.14e')}")  # Cadena incompleta o no válida
@@ -77,3 +77,4 @@ print(f"e10: {validar_numero('e10')}")  # Cadena no válida
 print(f"3.14e-: {validar_numero('3.14e-')}")  # Cadena incompleta o no válida
 
 
+"""
